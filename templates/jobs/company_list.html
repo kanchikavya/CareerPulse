@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Top Companies Hiring - CareerPulse{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-8">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 mb-2 fw-semibold">
+                <i class="bi bi-buildings me-1"></i> Verified Employers Directory
+            </span>
+            <h2 class="fw-bold mb-1 text-dark">Top Companies Hiring Talent</h2>
+            <p class="text-secondary mb-0">
+                Explore product tech giants, premier IT service leaders, disruptive high-growth startups, and established mid-sized innovators.
+            </p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <a href="{% url 'jobs:job_list' %}" class="btn btn-outline-primary px-3 py-2 fw-semibold">
+                <i class="bi bi-briefcase me-1"></i> Browse All Active Jobs &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Category Filter Tabs & Search -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+        <div class="row g-3 align-items-center">
+            <!-- Tabs -->
+            <div class="col-lg-8">
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'jobs:company_list' %}"
+                       class="btn btn-sm {% if not selected_type %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1">
+                        All Companies ({{ counts.ALL }})
+                    </a>
+                    <a href="{% url 'jobs:company_list' %}?type=PRODUCT"
+                       class="btn btn-sm {% if selected_type == 'PRODUCT' %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1">
+                        <i class="bi bi-cpu me-1"></i> Product Based ({{ counts.PRODUCT }})
+                    </a>
+                    <a href="{% url 'jobs:company_list' %}?type=SERVICE"
+                       class="btn btn-sm {% if selected_type == 'SERVICE' %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1">
+                        <i class="bi bi-diagram-3 me-1"></i> Service Based ({{ counts.SERVICE }})
+                    </a>
+                    <a href="{% url 'jobs:company_list' %}?type=STARTUP"
+                       class="btn btn-sm {% if selected_type == 'STARTUP' %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1">
+                        <i class="bi bi-rocket-takeoff me-1"></i> Startups ({{ counts.STARTUP }})
+                    </a>
+                    <a href="{% url 'jobs:company_list' %}?type=MID_SIZED"
+                       class="btn btn-sm {% if selected_type == 'MID_SIZED' %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1">
+                        <i class="bi bi-gear-wide-connected me-1"></i> Mid-sized ({{ counts.MID_SIZED }})
+                    </a>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <div class="col-lg-4">
+                <form method="get" action="{% url 'jobs:company_list' %}" class="d-flex gap-2">
+                    {% if selected_type %}
+                        <input type="hidden" name="type" value="{{ selected_type }}">
+                    {% endif %}
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" value="{{ query }}" class="form-control bg-light border-start-0" placeholder="Search by name, industry...">
+                        <button type="submit" class="btn btn-primary px-3">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Companies Grid -->
+    <div class="row g-4">
+        {% for company in companies %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 p-4 company-card hover-lift transition">
+                    <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            {% if company.logo %}
+                                <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="rounded-3" style="width: 52px; height: 52px; object-fit: cover;">
+                            {% else %}
+                                <div class="company-logo-placeholder" style="width: 52px; height: 52px; font-size: 1.3rem;">
+                                    {{ company.name|slice:":1"|upper }}
+                                </div>
+                            {% endif %}
+                            <div>
+                                <h5 class="fw-bold mb-0">
+                                    <a href="{% url 'jobs:company_detail' pk=company.pk %}" class="text-decoration-none text-dark hover-primary">
+                                        {{ company.name }}
+                                    </a>
+                                </h5>
+                                <small class="text-muted">{{ company.industry|truncatechars:32 }}</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Company Type Badge & Verification -->
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        {% if company.company_type == 'PRODUCT' %}
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle small px-2 py-1">
+                                <i class="bi bi-cpu me-1"></i> Product Based
+                            </span>
+                        {% elif company.company_type == 'SERVICE' %}
+                            <span class="badge bg-info-subtle text-info border border-info-subtle small px-2 py-1">
+                                <i class="bi bi-diagram-3 me-1"></i> Service Based
+                            </span>
+                        {% elif company.company_type == 'STARTUP' %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle small px-2 py-1">
+                                <i class="bi bi-rocket-takeoff me-1"></i> High-Growth Startup
+                            </span>
+                        {% elif company.company_type == 'MID_SIZED' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle small px-2 py-1">
+                                <i class="bi bi-gear-wide-connected me-1"></i> Mid-sized Tech
+                            </span>
+                        {% endif %}
+                        <span class="badge bg-light text-secondary border small px-2 py-1">
+                            <i class="bi bi-patch-check-fill text-success me-1"></i> Verified
+                        </span>
+                    </div>
+
+                    <!-- Description -->
+                    <p class="small text-secondary mb-3 flex-grow-1" style="line-height: 1.6; min-height: 48px;">
+                        {{ company.description|truncatewords:24 }}
+                    </p>
+
+                    <!-- Location & Openings -->
+                    <div class="d-flex justify-content-between align-items-center small text-muted border-top pt-3 mb-3">
+                        <span><i class="bi bi-geo-alt text-danger me-1"></i> {{ company.location|truncatechars:26 }}</span>
+                        <span class="badge bg-primary text-white rounded-pill px-2 py-1">
+                            {{ company.openings_count }} Openings
+                        </span>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column gap-2 mt-auto">
+                        <a href="{% url 'jobs:company_detail' pk=company.pk %}" class="btn btn-outline-primary btn-sm fw-semibold w-100 py-2">
+                            <i class="bi bi-building me-1"></i> View Company & Openings &rarr;
+                        </a>
+                        {% if company.website %}
+                            <a href="{{ company.website_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-light btn-sm text-secondary w-100 py-1" style="font-size: 0.8rem;">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Official {{ company.name }} Careers
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-buildings fs-1 text-muted d-block mb-3"></i>
+                <h5 class="fw-bold text-dark">No companies found</h5>
+                <p class="text-muted">Try clearing your search query or selecting a different company category.</p>
+                <a href="{% url 'jobs:company_list' %}" class="btn btn-primary btn-sm">View All Companies</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

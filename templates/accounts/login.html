@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In - CareerPulse{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <span class="brand-icon mb-2"><i class="bi bi-person-fill-lock fs-4"></i></span>
+                        <h3 class="fw-bold mt-2">Sign In</h3>
+                        <p class="text-muted small">Access your dashboard and manage applications</p>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger py-2 small">
+                                {% for error in form.non_field_errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label fw-medium small">Username</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-medium small">Password</label>
+                            {{ form.password }}
+                            {% if form.password.errors %}
+                                <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mt-2">
+                            Sign In
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <p class="small text-muted mb-2">Don't have an account yet?</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{% url 'accounts:register_candidate' %}" class="btn btn-outline-secondary btn-sm">
+                                Register as Candidate
+                            </a>
+                            <a href="{% url 'accounts:register_recruiter' %}" class="btn btn-outline-secondary btn-sm">
+                                Register as Recruiter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

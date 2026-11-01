@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+
+{% block title %}ATS Resume Scanner & Score Checker | CareerPulse{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill fw-semibold mb-2">
+            <i class="bi bi-shield-check text-primary me-1"></i> ATS Compatibility Engine
+        </span>
+        <h2 class="fw-bold mb-2">ATS Resume Scanner & Keyword Matcher</h2>
+        <p class="text-muted mx-auto" style="max-width: 650px;">
+            Over 75% of resumes are filtered out by automated Applicant Tracking Systems before reaching a human recruiter.
+            Scan your resume against real job requirements, identify missing keywords, and optimize your ATS score.
+        </p>
+    </div>
+
+    <!-- Scanner Input Form Card -->
+    <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 mb-5 bg-white">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row g-4">
+                <!-- 1. Select Target Job -->
+                <div class="col-12">
+                    <label class="form-label fw-bold small text-primary text-uppercase">1. Select Target Job Opening</label>
+                    <select name="target_job_id" class="form-select form-select-lg rounded-3 shadow-none border-primary">
+                        {% for job in active_jobs %}
+                            <option value="{{ job.id }}" {% if selected_job and selected_job.id == job.id %}selected{% endif %}>
+                                {{ job.title }} &middot; {{ job.company.name }} ({{ job.location }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted mt-1 d-block">The scanner checks your resume against this job's requirements and technical responsibilities.</small>
+                </div>
+
+                <!-- 2. Select Resume Source -->
+                <div class="col-12">
+                    <label class="form-label fw-bold small text-primary text-uppercase">2. Choose Resume Input Method</label>
+                    
+                    <ul class="nav nav-pills mb-3 gap-2" id="resumeSourceTabs" role="tablist">
+                        {% if profile %}
+                            <li class="nav-item">
+                                <button class="btn btn-outline-primary btn-sm rounded-pill px-3 active" id="tab-profile" type="button" onclick="setResumeSource('profile')">
+                                    <i class="bi bi-person-badge me-1"></i> Use My Profile Info & Resume
+                                </button>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3 {% if not profile %}active{% endif %}" id="tab-paste" type="button" onclick="setResumeSource('paste')">
+                                <i class="bi bi-clipboard-check me-1"></i> Paste Resume Text
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3" id="tab-upload" type="button" onclick="setResumeSource('upload')">
+                                <i class="bi bi-file-earmark-pdf me-1"></i> Upload PDF Resume
+                            </button>
+                        </li>
+                    </ul>
+
+                    <input type="hidden" name="resume_source" id="resume_source_input" value="{{ resume_source|default:'paste' }}">
+
+                    <!-- Profile Info Preview (if selected) -->
+                    {% if profile %}
+                        <div id="source-profile-section" class="p-3 rounded-3 bg-light border mb-3">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Saved Profile Loaded</span>
+                                <span class="fw-semibold text-dark">{{ profile.user.get_full_name|default:profile.user.username }}</span>
+                            </div>
+                            <div class="small text-muted mb-1"><strong>Headline:</strong> {{ profile.headline|default:"Software Engineer" }}</div>
+                            <div class="small text-muted mb-2"><strong>Core Skills:</strong> {{ profile.skills|default:"No skills saved" }}</div>
+                            {% if profile.resume %}
+                                <div class="small text-success"><i class="bi bi-file-earmark-pdf-fill me-1"></i> Uploaded resume PDF will be automatically scanned.</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Paste Text Box -->
+                    <div id="source-paste-section" class="mb-3 {% if profile and resume_source == 'profile' %}d-none{% endif %}">
+                        <textarea name="resume_text" rows="8" class="form-control rounded-3" placeholder="Paste your resume content here (summary, skills, experience bullets, education)...">{{ resume_text }}</textarea>
+                    </div>
+
+                    <!-- Upload File Box -->
+                    <div id="source-upload-section" class="mb-3 d-none">
+                        <input type="file" name="resume_file" class="form-control rounded-3" accept=".pdf,.txt">
+                        <small class="text-muted mt-1 d-block">Supported formats: PDF or TXT (Max 5MB)</small>
+                    </div>
+                </div>
+
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary px-5 py-3 fw-bold shadow">
+                        <i class="bi bi-search me-2"></i> Analyze ATS Score & Match
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Analysis Results Section -->
+    {% if analysis %}
+        <div id="results" class="row g-4">
+            <!-- Overall Score Card -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-lg rounded-4 p-4 text-center h-100 bg-white">
+                    <h5 class="fw-bold text-muted small text-uppercase mb-3">ATS Compatibility Score</h5>
+                    
+                    <div class="my-3">
+                        <div class="display-3 fw-bold text-{{ analysis.badge_class }}">
+                            {{ analysis.ats_score }}<span class="fs-4 text-muted">/100</span>
+                        </div>
+                        <span class="badge bg-{{ analysis.badge_class }}-subtle text-{{ analysis.badge_class }} border border-{{ analysis.badge_class }}-subtle px-3 py-2 rounded-pill mt-2">
+                            {{ analysis.grade }}
+                        </span>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Breakdown Metrics -->
+                    <div class="text-start">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small fw-semibold mb-1">
+                                <span>Keyword Match Rate</span>
+                                <span class="text-primary">{{ analysis.keyword_match_rate }}%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ analysis.keyword_match_rate }}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small fw-semibold mb-1">
+                                <span>ATS Structure & Health</span>
+                                <span class="text-success">{{ analysis.format_score }}%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ analysis.format_score }}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="small text-muted text-center mt-3">
+                            Targeting: <strong class="text-dark">{{ selected_job.title }}</strong> at <strong class="text-dark">{{ selected_job.company.name }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keywords & Formatting Checklist Column -->
+            <div class="col-lg-8">
+                <!-- Keywords Card -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                    <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                        <span class="feature-icon-badge bg-primary-subtle text-primary"><i class="bi bi-tags-fill"></i></span>
+                        Keyword Scanner Results
+                    </h5>
+
+                    <!-- Matched Keywords -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small fw-bold text-success text-uppercase">
+                                <i class="bi bi-check-circle-fill me-1"></i> Matched Keywords ({{ analysis.matched_keywords|length }})
+                            </span>
+                        </div>
+                        <div>
+                            {% for kw in analysis.matched_keywords %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill me-1 mb-2">
+                                    <i class="bi bi-check2 me-1"></i>{{ kw|title }}
+                                </span>
+                            {% empty %}
+                                <small class="text-muted">No primary technical keywords matched yet.</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Missing Keywords -->
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small fw-bold text-danger text-uppercase">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Missing Keywords to Add ({{ analysis.missing_keywords|length }})
+                            </span>
+                            <small class="text-muted">High priority for ATS pass rate</small>
+                        </div>
+                        <div>
+                            {% for kw in analysis.missing_keywords %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill me-1 mb-2">
+                                    <i class="bi bi-plus me-1"></i>{{ kw|title }}
+                                </span>
+                            {% empty %}
+                                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
+                                    <i class="bi bi-check-all me-1"></i> 100% of analyzed keywords present!
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Structural Checks Card -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                    <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                        <span class="feature-icon-badge bg-info-subtle text-info"><i class="bi bi-layout-text-sidebar-reverse"></i></span>
+                        ATS Formatting & Structural Health
+                    </h5>
+
+                    <div class="row g-2 small">
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded-3 d-flex align-items-center justify-content-between">
+                                <span>Contact Details Detected</span>
+                                {% if analysis.format_checks.has_contact_info %}
+                                    <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Pass</span>
+                                {% else %}
+                                    <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i>Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded-3 d-flex align-items-center justify-content-between">
+                                <span>Technical Skills Section</span>
+                                {% if analysis.format_checks.has_skills_section %}
+                                    <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Pass</span>
+                                {% else %}
+                                    <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i>Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded-3 d-flex align-items-center justify-content-between">
+                                <span>Experience Section</span>
+                                {% if analysis.format_checks.has_experience_section %}
+                                    <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Pass</span>
+                                {% else %}
+                                    <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i>Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded-3 d-flex align-items-center justify-content-between">
+                                <span>Education Section</span>
+                                {% if analysis.format_checks.has_education_section %}
+                                    <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Pass</span>
+                                {% else %}
+                                    <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i>Missing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actionable Suggestions -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                    <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                        <span class="feature-icon-badge bg-warning-subtle text-warning"><i class="bi bi-lightbulb-fill"></i></span>
+                        Recommendations to Boost Your Score
+                    </h5>
+                    <ul class="list-unstyled mb-0">
+                        {% for sugg in analysis.suggestions %}
+                            <li class="mb-2 d-flex align-items-start gap-2 small text-secondary">
+                                <i class="bi bi-arrow-right-circle-fill text-primary mt-1"></i>
+                                <span>{{ sugg }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- ATS-Optimized Resume Template Generator -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0 d-flex align-items-center gap-2">
+                            <span class="feature-icon-badge bg-dark text-white"><i class="bi bi-file-text-fill"></i></span>
+                            ATS-Friendly Resume Draft for {{ selected_job.title }}
+                        </h5>
+                        <button class="btn btn-outline-primary btn-sm px-3" onclick="copyAtsTemplate()" id="copyBtn">
+                            <i class="bi bi-clipboard me-1"></i> Copy Resume Draft
+                        </button>
+                    </div>
+                    <p class="small text-muted mb-3">
+                        Single-column, clean ATS template pre-tailored with the required keywords for this position.
+                        Copy this draft, add your personal milestones, and export as PDF.
+                    </p>
+                    <textarea id="atsResumeDraft" rows="12" class="form-control font-monospace small bg-light" readonly>{{ analysis.ats_resume_template }}</textarea>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% block extra_scripts %}
+<script>
+function setResumeSource(source) {
+    document.getElementById('resume_source_input').value = source;
+    
+    // Toggle active tabs
+    ['profile', 'paste', 'upload'].forEach(function(s) {
+        var tab = document.getElementById('tab-' + s);
+        var sec = document.getElementById('source-' + s + '-section');
+        if (tab) tab.classList.remove('active');
+        if (sec) sec.classList.add('d-none');
+    });
+
+    var activeTab = document.getElementById('tab-' + source);
+    var activeSec = document.getElementById('source-' + source + '-section');
+    if (activeTab) activeTab.classList.add('active');
+    if (activeSec) activeSec.classList.remove('d-none');
+}
+
+function copyAtsTemplate() {
+    var copyText = document.getElementById("atsResumeDraft");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+    
+    var btn = document.getElementById("copyBtn");
+    btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Copied to Clipboard!';
+    btn.classList.remove('btn-outline-primary');
+    btn.classList.add('btn-success');
+    setTimeout(function() {
+        btn.innerHTML = '<i class="bi bi-clipboard me-1"></i> Copy Resume Draft';
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-outline-primary');
+    }, 2500);
+}
+</script>
+{% endblock %}
+{% endblock %}

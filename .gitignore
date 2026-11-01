@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local environment variables
+.env
+.env.local
+
+# Databases
+*.sqlite3
+db.sqlite3
+
+# Uploaded Media files (resumes, logos)
+media/
+media/resumes/
+media/application_resumes/
+media/company_logos/
+
+# Static collection for production
+staticfiles/
+
+# Virtual Environments
+venv/
+env/
+.venv/
+ENV/
+
+# IDE & Editor settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db

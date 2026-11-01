@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Candidate Registration - CareerPulse{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <span class="badge bg-primary bg-opacity-10 text-primary p-2 mb-2 rounded-circle">
+                            <i class="bi bi-person-badge fs-3"></i>
+                        </span>
+                        <h3 class="fw-bold">Job Seeker Registration</h3>
+                        <p class="text-muted small">Create your profile, match your skills, and apply to top jobs</p>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger py-2 small">
+                                Please review and correct the errors highlighted below.
+                            </div>
+                        {% endif %}
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">First Name <span class="text-danger">*</span></label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Last Name <span class="text-danger">*</span></label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}<div class="text-danger small">{{ form.last_name.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Username <span class="text-danger">*</span></label>
+                                {{ form.username }}
+                                {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Email Address <span class="text-danger">*</span></label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.0 }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-medium small">Phone Number</label>
+                                {{ form.phone }}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-medium small">Professional Headline</label>
+                                {{ form.headline }}
+                                <small class="text-muted">e.g. Python Backend Developer | 3 YOE</small>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-medium small">Core Skills</label>
+                                {{ form.skills }}
+                                <small class="text-muted">Comma-separated skills (used for auto-matching)</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Password <span class="text-danger">*</span></label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}<div class="text-danger small">{{ form.password1.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Confirm Password <span class="text-danger">*</span></label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}<div class="text-danger small">{{ form.password2.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mt-4">
+                            Complete Candidate Registration
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <small class="text-muted">Already have an account? <a href="{% url 'accounts:login' %}" class="fw-semibold text-primary">Log in</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

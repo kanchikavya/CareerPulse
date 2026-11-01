@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Candidate Profile - CareerPulse{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Summary -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm rounded-3 text-center p-4">
+                <div class="company-logo-placeholder mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                    {{ user.first_name|default:user.username|slice:":1"|upper }}
+                </div>
+                <h5 class="fw-bold mb-1">{{ user.get_full_name|default:user.username }}</h5>
+                <p class="text-muted small mb-2">{{ profile.headline|default:"Profile Incomplete" }}</p>
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill small mb-3">
+                    {{ user.get_role_display }}
+                </span>
+
+                <hr>
+
+                <div class="text-start small text-muted">
+                    <div class="mb-2"><i class="bi bi-envelope me-2"></i> {{ user.email }}</div>
+                    {% if user.phone %}
+                        <div class="mb-2"><i class="bi bi-telephone me-2"></i> {{ user.phone }}</div>
+                    {% endif %}
+                    {% if profile.experience_years %}
+                        <div class="mb-2"><i class="bi bi-briefcase me-2"></i> {{ profile.experience_years }} Years Experience</div>
+                    {% endif %}
+                    {% if profile.education %}
+                        <div class="mb-2"><i class="bi bi-mortarboard me-2"></i> {{ profile.education }}</div>
+                    {% endif %}
+                </div>
+
+                <hr>
+
+                <!-- Current Resume Status -->
+                <div class="text-start">
+                    <h6 class="fw-bold small mb-2">Resume Status</h6>
+                    {% if profile.resume %}
+                        <div class="alert alert-success py-2 px-3 small d-flex align-items-center justify-content-between mb-0">
+                            <div>
+                                <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i>
+                                <span>Resume Attached</span>
+                            </div>
+                            <a href="{{ profile.resume.url }}" target="_blank" class="btn btn-sm btn-outline-success py-0 px-2">
+                                View
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning py-2 px-3 small mb-0">
+                            <i class="bi bi-exclamation-triangle me-1"></i> No resume uploaded yet.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Form -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-1">Edit Candidate Profile</h4>
+                    <p class="text-muted small mb-4">Keep your skills and resume up to date to get matched with the best opportunities</p>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger py-2 small">
+                                Please fix the errors below.
+                            </div>
+                        {% endif %}
+
+                        <h6 class="fw-bold text-primary mb-3">Personal & Contact Info</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">First Name</label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Last Name</label>
+                                {{ form.last_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Email Address</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Phone</label>
+                                {{ form.phone }}
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-primary mb-3">Professional Background</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label small fw-medium">Headline</label>
+                                {{ form.headline }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-medium">Skills (Comma-separated)</label>
+                                {{ form.skills }}
+                                <small class="text-muted">e.g. Python, Django, REST Framework, PostgreSQL, Docker</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Years of Experience</label>
+                                {{ form.experience_years }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Highest Education</label>
+                                {{ form.education }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-medium">Bio / Summary</label>
+                                {{ form.bio }}
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-primary mb-3">Resume & Social Profiles</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label small fw-medium">Upload New Resume (PDF only, max 5MB)</label>
+                                {{ form.resume }}
+                                {% if form.resume.errors %}
+                                    <div class="text-danger small mt-1">{{ form.resume.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-medium">Portfolio URL</label>
+                                {{ form.portfolio_url }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-medium">LinkedIn URL</label>
+                                {{ form.linkedin_url }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-medium">GitHub URL</label>
+                                {{ form.github_url }}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold">
+                            Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

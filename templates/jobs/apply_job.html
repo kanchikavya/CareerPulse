@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Apply for {{ job.title }} - CareerPulse{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <!-- Header -->
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                        {% if job.company.logo %}
+                            <img src="{{ job.company.logo.url }}" alt="{{ job.company.name }}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                        {% else %}
+                            <div class="company-logo-placeholder" style="width: 50px; height: 50px;">
+                                {{ job.company.name|slice:":1"|upper }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h4 class="fw-bold mb-1">Apply for {{ job.title }}</h4>
+                            <p class="text-muted small mb-0">{{ job.company.name }} &middot; {{ job.location }} &middot; {{ job.get_job_type_display }}</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger py-2 small">
+                                Please correct the errors below.
+                            </div>
+                        {% endif %}
+
+                        <!-- Resume Options -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-primary">Resume Attachment <span class="text-danger">*</span></label>
+                            
+                            {% if profile and profile.resume %}
+                                <div class="card bg-light border p-3 mb-3">
+                                    <div class="form-check">
+                                        {{ form.use_profile_resume }}
+                                        <label class="form-check-label fw-medium" for="use_profile_resume_checkbox">
+                                            Use resume from your candidate profile:
+                                            <a href="{{ profile.resume.url }}" target="_blank" class="ms-1 text-decoration-none text-primary">
+                                                <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> View Profile Resume
+                                            </a>
+                                        </label>
+                                    </div>
+                                    <small class="text-muted ms-4 d-block mt-1">Uncheck this if you wish to upload a role-specific tailored resume below.</small>
+                                </div>
+                            {% endif %}
+
+                            <div class="mb-2">
+                                <label class="form-label small fw-medium">Upload Tailored Resume (PDF only, max 5MB)</label>
+                                {{ form.resume }}
+                                {% if form.resume.errors %}
+                                    <div class="text-danger small mt-1">{{ form.resume.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Cover Letter -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-primary">Cover Note / Why You're A Fit</label>
+                            {{ form.cover_letter }}
+                            <small class="text-muted">Highlight your relevant achievements, projects, or why you're interested in {{ job.company.name }}.</small>
+                        </div>
+
+                        <div class="alert alert-light border small text-muted">
+                            <i class="bi bi-shield-check text-success me-1"></i>
+                            Your contact details ({{ user.email }}{% if user.phone %}, {{ user.phone }}{% endif %}) and profile skills will be shared with {{ job.company.name }}.
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="{% url 'jobs:job_detail' pk=job.pk %}" class="btn btn-light px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                                Submit Application &rarr;
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

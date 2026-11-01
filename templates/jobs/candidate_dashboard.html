@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+
+{% block title %}Candidate Dashboard - CareerPulse{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Welcome back, {{ user.first_name|default:user.username }}!</h2>
+            <p class="text-muted small mb-0">{{ profile.headline|default:"Candidate Profile" }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'accounts:candidate_profile' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-pencil me-1"></i> Edit Profile & Resume
+            </a>
+            <a href="{% url 'jobs:job_list' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-search me-1"></i> Browse Jobs
+            </a>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="card stat-card p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-send-fill"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">{{ total_applied }}</h4>
+                        <small class="text-muted">Total Applied</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card stat-card p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">{{ shortlisted_count }}</h4>
+                        <small class="text-muted">Shortlisted</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card stat-card p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">{{ pending_count }}</h4>
+                        <small class="text-muted">In Review</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card stat-card p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-bookmark-fill"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">{{ saved_jobs.count }}</h4>
+                        <small class="text-muted">Bookmarked</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ATS Resume Scanner Banner -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 text-white" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-left: 5px solid #3b82f6 !important;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-3 bg-primary bg-opacity-25 text-primary d-flex align-items-center justify-content-center p-3 fs-3" style="width: 54px; height: 54px;">
+                    <i class="bi bi-shield-check text-primary"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1 text-white d-flex align-items-center gap-2">
+                        ATS Resume Scanner & Keyword Matcher
+                        <span class="badge bg-primary text-white small" style="font-size: 0.68rem;">Instant Feedback</span>
+                    </h5>
+                    <p class="small text-secondary mb-0">Check if your resume will pass automated recruiter filters, find missing keywords, and get ATS formatting suggestions before applying.</p>
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'jobs:ats_checker' %}" class="btn btn-primary px-3 py-2 fw-semibold shadow-sm">
+                    <i class="bi bi-lightning-charge-fill me-1"></i> Scan Resume with ATS &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Tabs -->
+    <ul class="nav nav-pills mb-4" id="candidateTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-medium" id="apps-tab" data-bs-toggle="pill" data-bs-target="#apps-content" type="button" role="tab">
+                <i class="bi bi-list-check me-1"></i> My Applications ({{ total_applied }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-medium" id="recommended-tab" data-bs-toggle="pill" data-bs-target="#recommended-content" type="button" role="tab">
+                <i class="bi bi-stars text-warning me-1"></i> Recommended For You ({{ recommended_jobs|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-medium" id="saved-tab" data-bs-toggle="pill" data-bs-target="#saved-content" type="button" role="tab">
+                <i class="bi bi-bookmark me-1"></i> Saved Jobs ({{ saved_jobs.count }})
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="candidateTabsContent">
+        <!-- 1. Applications Table -->
+        <div class="tab-pane fade show active" id="apps-content" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Job Title & Company</th>
+                                <th>Location & Type</th>
+                                <th>Applied Date</th>
+                                <th>Status</th>
+                                <th>Recruiter Feedback / Notes</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in applications %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">
+                                            <a href="{% url 'jobs:job_detail' pk=app.job.pk %}" class="text-decoration-none text-dark">
+                                                {{ app.job.title }}
+                                            </a>
+                                        </div>
+                                        <small class="text-muted">
+                                            <a href="{% url 'jobs:company_detail' pk=app.job.company.pk %}" class="text-decoration-none text-muted hover-primary">
+                                                <i class="bi bi-building me-1"></i>{{ app.job.company.name }}
+                                            </a>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div><small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ app.job.location }}</small></div>
+                                        <span class="badge bg-light text-secondary border small">{{ app.job.get_job_type_display }}</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ app.applied_at|date:"M d, Y" }}</small>
+                                    </td>
+                                    <td>
+                                        {% if app.status == 'APPLIED' %}
+                                            <span class="badge badge-status-applied px-2 py-1"><i class="bi bi-clock me-1"></i> Applied</span>
+                                        {% elif app.status == 'SHORTLISTED' %}
+                                            <span class="badge badge-status-shortlisted px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i> Shortlisted</span>
+                                        {% elif app.status == 'REJECTED' %}
+                                            <span class="badge badge-status-rejected px-2 py-1"><i class="bi bi-x-circle me-1"></i> Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if app.recruiter_notes %}
+                                            <small class="text-dark"><i class="bi bi-chat-left-quote me-1 text-primary"></i>{{ app.recruiter_notes }}</small>
+                                        {% else %}
+                                            <small class="text-muted fst-italic">Pending review</small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex align-items-center justify-content-end gap-2 flex-nowrap">
+                                            <a href="{% url 'jobs:job_detail' pk=app.job.pk %}" class="btn btn-primary btn-sm px-3 fw-semibold text-nowrap">
+                                                <i class="bi bi-briefcase me-1"></i> View Job Details
+                                            </a>
+                                            {% if app.resume %}
+                                                <a href="{{ app.resume.url }}" target="_blank" class="btn btn-outline-secondary btn-sm px-2 text-nowrap" title="View / Download Submitted Resume PDF">
+                                                    <i class="bi bi-file-earmark-pdf me-1"></i> My Resume
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-2 d-block mb-2 text-muted"></i>
+                                        You haven't applied to any jobs yet.
+                                        <div class="mt-2">
+                                            <a href="{% url 'jobs:job_list' %}" class="btn btn-primary btn-sm">Browse Jobs & Apply</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Recommended Jobs -->
+        <div class="tab-pane fade" id="recommended-content" role="tabpanel">
+            <!-- Suggested Roles Section -->
+            {% if suggested_roles %}
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                        <div>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 small fw-semibold mb-1">
+                                <i class="bi bi-stars me-1"></i> Tailored Career Pathways
+                            </span>
+                            <h5 class="fw-bold mb-0 text-dark">Suggested Job Roles for Your Skill Stack</h5>
+                        </div>
+                        <a href="{% url 'accounts:candidate_profile' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-pencil me-1"></i> Edit Profile Skills
+                        </a>
+                    </div>
+
+                    <!-- Skills Pill Bar -->
+                    <div class="mb-3">
+                        <small class="text-muted me-2">Your Skills:</small>
+                        {% for s in profile.get_skills_list %}
+                            <span class="badge-skill fs-6 px-2 py-1 me-1 mb-1">{{ s }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="row g-3">
+                        {% for role in suggested_roles %}
+                            <div class="col-md-6 col-lg-3">
+                                <div class="p-3 rounded-3 border bg-light h-100 d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="fw-bold text-dark mb-0">{{ role.title }}</h6>
+                                        <span class="badge bg-success text-white small">{{ role.match_rate }}</span>
+                                    </div>
+                                    <small class="text-secondary mb-3 flex-grow-1" style="line-height: 1.5;">{{ role.description }}</small>
+                                    <div class="border-top pt-2 mt-auto">
+                                        <small class="text-muted d-block" style="font-size: 0.75rem;"><strong>Required:</strong> {{ role.primary_skills }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Database Note -->
+                    <div class="alert alert-info border-0 bg-info-subtle text-info-emphasis rounded-3 p-3 mt-3 mb-0 small d-flex align-items-start gap-2">
+                        <i class="bi bi-info-circle-fill fs-5 flex-shrink-0 text-info"></i>
+                        <div>
+                            <strong>MySQL & Relational Databases in Django:</strong>
+                            Knowing <strong>MySQL</strong> gives you complete relational database & SQL coverage! In Django, the ORM handles all queries, models, and migrations identically across MySQL, PostgreSQL, and SQLite. Our matching engine treats MySQL and SQL as equivalent, ensuring you match roles asking for SQL or relational databases.
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-briefcase text-primary me-2"></i>Live Openings Matching Your Profile</h6>
+                <small class="text-muted">{{ recommended_jobs|length }} matches found</small>
+            </div>
+
+            <div class="row g-4">
+                {% for item in recommended_jobs %}
+                    {% with job=item.job match_pct=item.match_pct %}
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card h-100 job-card p-3 shadow-sm d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="fw-bold mb-0 text-dark">{{ job.title }}</h6>
+                                        <small class="text-muted">{{ job.company.name }}</small>
+                                    </div>
+                                    <span class="badge-match match-high">{{ match_pct }}% Match</span>
+                                </div>
+                                <div class="small text-muted mb-2">
+                                    <i class="bi bi-geo-alt me-1 text-primary"></i> {{ job.location }} &middot; {{ job.get_job_type_display }}
+                                </div>
+                                <div class="mb-3">
+                                    {% for skill in job.get_skills_list|slice:":4" %}
+                                        <span class="badge-skill">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                                <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">{{ job.created_at|timesince }} ago</small>
+                                    <a href="{% url 'jobs:job_detail' pk=job.pk %}" class="btn btn-primary btn-sm px-3">
+                                        View & Apply
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endwith %}
+                {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-lightbulb fs-2 text-muted d-block mb-2"></i>
+                        <h6 class="fw-bold">No recommendations found yet</h6>
+                        <p class="text-muted small">Update the skills on your profile to unlock tailored job recommendations.</p>
+                        <a href="{% url 'accounts:candidate_profile' %}" class="btn btn-outline-primary btn-sm">Update Profile Skills</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 3. Saved Jobs -->
+        <div class="tab-pane fade" id="saved-content" role="tabpanel">
+            <div class="row g-4">
+                {% for saved in saved_jobs %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 job-card p-3 shadow-sm d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-dark">{{ saved.job.title }}</h6>
+                                    <small class="text-muted">{{ saved.job.company.name }}</small>
+                                </div>
+                                <a href="{% url 'jobs:toggle_save_job' pk=saved.job.pk %}" class="text-danger" title="Remove bookmark">
+                                    <i class="bi bi-bookmark-x-fill fs-5"></i>
+                                </a>
+                            </div>
+                            <div class="small text-muted mb-2">
+                                <i class="bi bi-geo-alt me-1 text-primary"></i> {{ saved.job.location }} &middot; {{ saved.job.get_job_type_display }}
+                            </div>
+                            <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Saved {{ saved.saved_at|timesince }} ago</small>
+                                <a href="{% url 'jobs:job_detail' pk=saved.job.pk %}" class="btn btn-outline-primary btn-sm px-3">
+                                    View Job
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-bookmark fs-2 text-muted d-block mb-2"></i>
+                        <h6 class="fw-bold">No bookmarked jobs</h6>
+                        <p class="text-muted small">Click the bookmark icon on any job to save it here for later.</p>
+                        <a href="{% url 'jobs:job_list' %}" class="btn btn-primary btn-sm">Explore Openings</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

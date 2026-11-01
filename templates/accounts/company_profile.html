@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Profile - CareerPulse{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Info -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm rounded-3 text-center p-4">
+                {% if company.logo %}
+                    <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="rounded mx-auto mb-3" style="width: 90px; height: 90px; object-fit: cover;">
+                {% else %}
+                    <div class="company-logo-placeholder mx-auto mb-3" style="width: 90px; height: 90px; font-size: 2.2rem;">
+                        {{ company.name|slice:":1"|upper }}
+                    </div>
+                {% endif %}
+
+                <h5 class="fw-bold mb-1">{{ company.name }}</h5>
+                <p class="text-muted small mb-2">{{ company.industry|default:"Tech & Services" }}</p>
+
+                <!-- Approval Status Badge -->
+                <div class="mb-3">
+                    {% if company.is_approved %}
+                        <span class="badge bg-success bg-opacity-10 text-success px-3 py-1 rounded-pill small">
+                            <i class="bi bi-patch-check-fill me-1"></i> Verified & Approved
+                        </span>
+                    {% else %}
+                        <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-1 rounded-pill small">
+                            <i class="bi bi-clock-history me-1"></i> Approval Pending
+                        </span>
+                    {% endif %}
+                </div>
+
+                <hr>
+
+                <div class="text-start small text-muted">
+                    <div class="mb-2"><i class="bi bi-geo-alt me-2"></i> {{ company.location }}</div>
+                    {% if company.website %}
+                        <div class="mb-2">
+                            <i class="bi bi-globe me-2"></i>
+                            <a href="{{ company.website_url }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-medium text-primary">
+                                {{ company.website }} <i class="bi bi-box-arrow-up-right small ms-1"></i>
+                            </a>
+                        </div>
+                    {% endif %}
+                    <div class="mb-2"><i class="bi bi-person me-2"></i> Recruiter: {{ company.recruiter.get_full_name|default:company.recruiter.username }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-1">Company Profile Settings</h4>
+                    <p class="text-muted small mb-4">Update your brand presence and company details shown to candidates</p>
+
+                    {% if not company.is_approved %}
+                        <div class="alert alert-warning py-3 small mb-4">
+                            <i class="bi bi-shield-exclamation fs-5 me-2"></i>
+                            <strong>Company Verification In Progress:</strong> An administrator must approve your company profile before your job vacancies are visible publicly.
+                        </div>
+                    {% endif %}
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger py-2 small">
+                                Please fix the errors highlighted below.
+                            </div>
+                        {% endif %}
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Company Name</label>
+                                {{ form.name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Industry</label>
+                                {{ form.industry }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Headquarters / Location</label>
+                                {{ form.location }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Website URL</label>
+                                {{ form.website }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-medium">Company Logo</label>
+                                {{ form.logo }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-medium">About the Company</label>
+                                {{ form.description }}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold mt-4">
+                            Save Company Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

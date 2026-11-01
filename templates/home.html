@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+
+{% block title %}CareerPulse - Find Your Dream Career or Hire Top Talent{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center position-relative">
+    <div class="container py-4">
+        <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-25 px-3 py-2 rounded-pill fw-medium mb-3 shadow-sm">
+            <i class="bi bi-stars text-warning me-1"></i> Over {{ total_jobs }} tech jobs live right now
+        </span>
+        <h1 class="display-4 fw-bold mb-3 hero-title">Find The Job That Powers Your Future</h1>
+        <p class="lead opacity-75 mx-auto mb-5" style="max-width: 650px;">
+            Connecting skilled developers, designers, and managers with top-tier companies. Smart filtering, resume tracking, and role-based matching.
+        </p>
+
+        <!-- Search Box Form -->
+        <div class="hero-search-card mx-auto text-start" style="max-width: 850px;">
+            <form action="{% url 'jobs:job_list' %}" method="GET" class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" class="form-control border-0 shadow-none ps-0" placeholder="Job title, skills (e.g. Python, React), or company">
+                    </div>
+                </div>
+                <div class="col-md-4 border-start-md">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-geo-alt"></i></span>
+                        <input type="text" name="location" class="form-control border-0 shadow-none ps-0" placeholder="Location or 'Remote'">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                        Search Jobs
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Metrics & Quick Stats -->
+<section class="py-5 bg-white border-bottom">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="p-3">
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary mx-auto mb-3">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">{{ total_jobs|default:"30+" }}</h3>
+                    <p class="text-muted mb-0">Active Job Postings</p>
+                </div>
+            </div>
+            <div class="col-md-4 border-start-md border-end-md">
+                <div class="p-3">
+                    <div class="stat-icon bg-success bg-opacity-10 text-success mx-auto mb-3">
+                        <i class="bi bi-building-check"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">{{ total_companies|default:"24" }}</h3>
+                    <p class="text-muted mb-0">Verified Companies</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3">
+                    <div class="stat-icon bg-info bg-opacity-10 text-info mx-auto mb-3">
+                        <i class="bi bi-send-check"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">{{ total_applications|default:"500+" }}</h3>
+                    <p class="text-muted mb-0">Applications Processed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Company Categories Section -->
+<section class="py-5 bg-light border-bottom">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 mb-2 fw-semibold">
+                    <i class="bi bi-building me-1"></i> Industry Sectors
+                </span>
+                <h3 class="fw-bold mb-1">Explore Companies by Category</h3>
+                <p class="text-muted mb-0">Discover opportunities across tech giants, enterprise consultancies, hyper-growth startups, and SaaS mid-sized firms</p>
+            </div>
+            <a href="{% url 'jobs:company_list' %}" class="btn btn-outline-primary btn-sm px-3 fw-medium">
+                View All 24 Companies <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-3">
+            <!-- 1. Product Based -->
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'jobs:job_list' %}?company_type=PRODUCT" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100 hover-lift bg-white">
+                        <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center p-3 mb-3 fs-3" style="width: 54px; height: 54px;">
+                            <i class="bi bi-cpu"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1">Product Based</h5>
+                        <p class="small text-muted mb-3">Google, Microsoft, Amazon, Adobe, Atlassian, Uber</p>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle small align-self-start">
+                            View Product Jobs &rarr;
+                        </span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 2. Service Based -->
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'jobs:job_list' %}?company_type=SERVICE" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100 hover-lift bg-white">
+                        <div class="rounded-3 bg-info bg-opacity-10 text-info d-inline-flex align-items-center justify-content-center p-3 mb-3 fs-3" style="width: 54px; height: 54px;">
+                            <i class="bi bi-diagram-3"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1">Service Based</h5>
+                        <p class="small text-muted mb-3">TCS, Infosys, Wipro, Accenture, Cognizant, Tech Mahindra</p>
+                        <span class="badge bg-info-subtle text-info border border-info-subtle small align-self-start">
+                            View Service Jobs &rarr;
+                        </span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 3. High-Growth Startups -->
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'jobs:job_list' %}?company_type=STARTUP" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100 hover-lift bg-white">
+                        <div class="rounded-3 bg-warning bg-opacity-10 text-warning d-inline-flex align-items-center justify-content-center p-3 mb-3 fs-3" style="width: 54px; height: 54px;">
+                            <i class="bi bi-rocket-takeoff"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1">High-Growth Startups</h5>
+                        <p class="small text-muted mb-3">Zepto, CRED, Blinkit, Meesho, Razorpay, Zerodha</p>
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle small align-self-start">
+                            View Startup Jobs &rarr;
+                        </span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 4. Mid-Sized Innovators -->
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'jobs:job_list' %}?company_type=MID_SIZED" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100 hover-lift bg-white">
+                        <div class="rounded-3 bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center p-3 mb-3 fs-3" style="width: 54px; height: 54px;">
+                            <i class="bi bi-gear-wide-connected"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1">Mid-Sized Tech</h5>
+                        <p class="small text-muted mb-3">Freshworks, Zoho, Thoughtworks, Persistent, BrowserStack, Zomato</p>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle small align-self-start">
+                            View Mid-sized Jobs &rarr;
+                        </span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Jobs Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Latest Job Openings</h3>
+                <p class="text-muted mb-0">Explore fresh opportunities handpicked for you</p>
+            </div>
+            <a href="{% url 'jobs:job_list' %}" class="btn btn-outline-primary btn-sm px-3 fw-medium">
+                View All Jobs <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for job in recent_jobs %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 job-card p-3 shadow-sm position-relative">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                {% if job.company.logo %}
+                                    <img src="{{ job.company.logo.url }}" alt="{{ job.company.name }}" class="rounded" style="width: 48px; height: 48px; object-fit: cover;">
+                                {% else %}
+                                    <div class="company-logo-placeholder">
+                                        {{ job.company.name|slice:":1"|upper }}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-dark">{{ job.title }}</h6>
+                                    <small class="text-muted">
+                                        <a href="{% url 'jobs:company_detail' pk=job.company.pk %}" class="text-decoration-none text-muted hover-primary">
+                                            {{ job.company.name }}
+                                        </a>
+                                    </small>
+                                </div>
+                            </div>
+                            <span class="badge bg-light text-secondary border">
+                                {{ job.get_job_type_display }}
+                            </span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center text-muted small mb-1">
+                                <i class="bi bi-geo-alt me-1 text-primary"></i> {{ job.location }}
+                            </div>
+                            {% if job.salary_min or job.salary_max %}
+                                <div class="d-flex align-items-center text-muted small">
+                                    <i class="bi bi-cash me-1 text-success"></i>
+                                    {% if job.salary_min and job.salary_max %}
+                                        ₹{{ job.salary_min|floatformat:0 }} - ₹{{ job.salary_max|floatformat:0 }}
+                                    {% elif job.salary_min %}
+                                        ₹{{ job.salary_min|floatformat:0 }}+
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {% for skill in job.get_skills_list|slice:":4" %}
+                                <span class="badge-skill">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                            <small class="text-muted"><i class="bi bi-clock-history me-1 text-success"></i>Posted {{ job.created_at|timesince }} ago</small>
+                            <a href="{% url 'jobs:job_detail' pk=job.pk %}" class="btn btn-primary btn-sm px-3">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">No jobs posted yet. Check back soon or be the first to post!</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Dual Role CTA -->
+<section class="py-5 bg-light border-top">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="p-4 bg-white rounded-3 shadow-sm border h-100">
+                    <div class="badge bg-primary bg-opacity-10 text-primary p-2 mb-3">
+                        <i class="bi bi-person-workspace fs-4"></i>
+                    </div>
+                    <h4 class="fw-bold">For Candidates</h4>
+                    <p class="text-muted">
+                        Build your candidate profile, attach a verified PDF resume, search and filter jobs by skills, and get real-time email notifications on status updates.
+                    </p>
+                    <a href="{% url 'accounts:register_candidate' %}" class="btn btn-outline-primary">
+                        Create Candidate Account &rarr;
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-4 bg-white rounded-3 shadow-sm border h-100">
+                    <div class="badge bg-success bg-opacity-10 text-success p-2 mb-3">
+                        <i class="bi bi-building fs-4"></i>
+                    </div>
+                    <h4 class="fw-bold">For Recruiters & Companies</h4>
+                    <p class="text-muted">
+                        Register your organization, post unlimited job vacancies, review incoming candidate resumes, track pipeline metrics, and shortlist or reject in 1 click.
+                    </p>
+                    <a href="{% url 'accounts:register_recruiter' %}" class="btn btn-outline-success">
+                        Register as Recruiter &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

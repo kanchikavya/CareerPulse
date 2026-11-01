@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Recruiter Registration - CareerPulse{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <span class="badge bg-success bg-opacity-10 text-success p-2 mb-2 rounded-circle">
+                            <i class="bi bi-building fs-3"></i>
+                        </span>
+                        <h3 class="fw-bold">Employer & Recruiter Registration</h3>
+                        <p class="text-muted small">Register your company, post job listings, and hire qualified candidates</p>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger py-2 small">
+                                Please review and correct the errors highlighted below.
+                            </div>
+                        {% endif %}
+
+                        <h6 class="fw-bold text-primary mb-3">1. Recruiter Information</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">First Name <span class="text-danger">*</span></label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Last Name <span class="text-danger">*</span></label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}<div class="text-danger small">{{ form.last_name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Username <span class="text-danger">*</span></label>
+                                {{ form.username }}
+                                {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Work Email <span class="text-danger">*</span></label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium small">Contact Phone</label>
+                                {{ form.phone }}
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-primary mb-3">2. Company Details</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Company Name <span class="text-danger">*</span></label>
+                                {{ form.company_name }}
+                                {% if form.company_name.errors %}<div class="text-danger small">{{ form.company_name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Headquarters / Location <span class="text-danger">*</span></label>
+                                {{ form.company_location }}
+                                {% if form.company_location.errors %}<div class="text-danger small">{{ form.company_location.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Company Website</label>
+                                {{ form.company_website }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Industry</label>
+                                {{ form.industry }}
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-primary mb-3">3. Security</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Password <span class="text-danger">*</span></label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}<div class="text-danger small">{{ form.password1.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Confirm Password <span class="text-danger">*</span></label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}<div class="text-danger small">{{ form.password2.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info py-2 small mt-4">
+                            <i class="bi bi-info-circle me-1"></i>
+                            After registration, your company will be reviewed by an administrator. You can view your dashboard right away.
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold mt-2">
+                            Register Company & Recruiter
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <small class="text-muted">Already have an account? <a href="{% url 'accounts:login' %}" class="fw-semibold text-primary">Log in</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
