@@ -37,8 +37,9 @@ class DynamicJobFreshnessMiddleware:
                     # Stagger hours within today: 1 hr ago, 2 hrs ago, etc.
                     stagger_hours = (idx % 6) + 1
                     job.created_at = now - timedelta(hours=stagger_hours)
-                    # Extend deadline 15 to 45 days in the future
-                    job.deadline = today + timedelta(days=20 + (idx * 5))
+                    # Realistic corporate hiring deadlines: 14 to 30 days ahead (2 to 4 weeks)
+                    deadline_days = 14 + ((idx * 2) % 16)
+                    job.deadline = today + timedelta(days=deadline_days)
                     job.save(update_fields=['created_at', 'deadline'])
 
             # Ensure all real companies have verified live official career URLs

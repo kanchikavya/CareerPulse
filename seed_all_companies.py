@@ -998,7 +998,7 @@ def run():
                     'skills_required': jdata['skills'],
                     'description': jdata['description'],
                     'responsibilities': jdata.get('responsibilities', ''),
-                    'deadline': today + timedelta(days=25 + (idx * 5)),
+                    'deadline': today + timedelta(days=14 + ((idx * 2) % 16)),
                     'is_active': True,
                 }
             )
@@ -1012,7 +1012,7 @@ def run():
             job.skills_required = jdata['skills']
             job.description = jdata['description']
             job.responsibilities = jdata.get('responsibilities', '')
-            job.deadline = today + timedelta(days=25 + (idx * 5))
+            job.deadline = today + timedelta(days=14 + ((idx * 2) % 16))
             job.is_active = True
             job.created_at = now - timedelta(hours=(idx * 2) + 1)
             job.save()
