@@ -65,7 +65,7 @@ class DynamicJobFreshnessMiddleware:
                 'Zoho': 'https://www.zoho.com/careers/',
                 'Thoughtworks': 'https://www.thoughtworks.com/careers',
                 'Persistent': 'https://www.persistent.com/careers/',
-                'BrowserStack': 'https://www.browserstack.com/careers',
+                'BrowserStack': 'https://browserstack.wd3.myworkdayjobs.com/External',
                 'Zomato': 'https://www.zomato.com/careers',
             }
             for cname, site_url in real_sites.items():

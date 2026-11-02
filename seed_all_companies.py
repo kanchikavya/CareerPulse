@@ -856,27 +856,30 @@ COMPANIES_DATA = [
         'email': 'careers@browserstack.com',
         'company_name': 'BrowserStack',
         'company_type': Company.CompanyType.MID_SIZED,
-        'website': 'https://www.browserstack.com/careers',
+        'website': 'https://browserstack.wd3.myworkdayjobs.com/External',
         'location': 'Mumbai, India (Remote-First)',
         'industry': 'Software Testing Cloud & Developer Infrastructure',
         'description': (
             'BrowserStack is the world’s leading software testing platform powered by 15+ global data centers. '
-            'Over 50,000 customers, including Microsoft, Twitter, and Spotify, rely on BrowserStack to deliver bug-free software.'
+            'Over 50,000 customers, including Microsoft, Twitter, and Spotify, rely on BrowserStack to deliver bug-free software. '
+            'Core engineering roles (including backend, platform, and full stack) are listed under Software Engineer on their official Workday portal.'
         ),
         'jobs': [
             {
-                'title': 'Backend Developer - Cloud Automation Grid',
+                'title': 'Software Engineer - Cloud Platform & Backend Systems',
                 'job_type': Job.JobType.REMOTE,
                 'location': 'Remote (India)',
                 'salary_min': 2000000,
                 'salary_max': 3400000,
-                'experience': 3,
-                'skills': 'Python, Linux, Docker, Distributed Systems, WebSockets, Redis, PostgreSQL',
+                'experience': 2,
+                'skills': 'Python, Linux, Docker, Distributed Systems, WebSockets, Redis, PostgreSQL, MySQL',
                 'description': (
-                    'Build distributed device clouds and browser virtualization grids that run millions of automated tests daily.'
+                    'Build distributed device clouds, backend services, and browser virtualization grids that run millions of automated tests daily. '
+                    'Work on high-throughput backend infrastructure powering real-time testing across 3,000+ real mobile devices and desktop browsers.'
                 ),
                 'responsibilities': (
-                    '- Manage real-time device allocation and sandbox cleanup.\n'
+                    '- Architect and scale backend services powering cloud device grids.\n'
+                    '- Manage real-time device allocation, containerization, and sandbox cleanup.\n'
                     '- Optimize network tunnels and streaming protocols for interactive browser sessions.'
                 ),
             },
