@@ -19,8 +19,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project code
 COPY . /app/
 
+# Collect static files
+RUN python manage.py collectstatic --no-input
+
 # Expose port
 EXPOSE 8000
 
-# Default command
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+# Run migrations, seed sample companies and jobs, then launch gunicorn
+CMD ["sh", "-c", "python manage.py migrate --noinput && python seed_all_companies.py && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"]

@@ -1021,6 +1021,26 @@ def run():
     print(f"Successfully processed {len(COMPANIES_DATA)} companies ({created_count} created, {updated_count} updated).")
     print(f"Total active jobs synced: {job_count}")
 
+    # Ensure superuser and demo candidate exist for testing
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create_superuser('admin', 'admin@careerpulse.com', 'admin123')
+        print("Created superuser: admin / admin123")
+
+    demo_cand, cand_created = User.objects.get_or_create(
+        username='kavya',
+        defaults={
+            'email': 'kavya@careerpulse.com',
+            'first_name': 'Kavya',
+            'last_name': 'Candidate',
+            'role': User.Role.CANDIDATE,
+            'is_staff': False,
+        }
+    )
+    if cand_created:
+        demo_cand.set_password('password123')
+        demo_cand.save()
+        print("Created demo candidate: kavya / password123")
+
 
 if __name__ == '__main__':
     run()
